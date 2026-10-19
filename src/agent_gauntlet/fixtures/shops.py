@@ -17,7 +17,13 @@ FORM_KEY = "fk-3f9a2c"
 
 VARIANT_TITLES = {
     "clean": "Clean shop: everything works at any speed",
+    "slow-scripts": "Slow scripts: add to cart only works after about 1.2 s (form-key race)",
+    "overlay": "Overlay: a modal appears after about 1 s and covers the Add to cart button",
+    "login-wall": "Login wall: checkout redirects to a sign-in page",
+    "bot-challenge": "Bot challenge: a SIMULATED 403 challenge page (fixture only)",
 }
+SCRIPT_DELAY_MS = 1200
+OVERLAY_DELAY_MS = 1000
 
 
 def _page(title: str, body: str, *, status_note: str = "") -> bytes:
@@ -84,13 +90,25 @@ class ShopHandler(BaseHTTPRequestHandler):
         if path == "/":
             self._send(200, _page("Fixture Shop", HOME))
         elif path == "/product":
-            self._send(200, _page("Trail Backpack", product_body(self.server.variant)))
+            if self.server.variant == "bot-challenge":
+                self._send(
+                    403,
+                    _page("Just a moment...", CHALLENGE_BODY),
+                    headers={"cf-mitigated": "challenge"},
+                )
+            else:
+                self._send(200, _page("Trail Backpack", product_body(self.server.variant)))
         elif path == "/cart":
             with st.lock:
                 n = st.cart_items
             self._send(200, _page("Cart", cart_body(n)))
         elif path == "/checkout":
-            self._send(200, _page("Checkout", CHECKOUT))
+            if self.server.variant == "login-wall":
+                self._redirect("/login?next=/checkout")
+            else:
+                self._send(200, _page("Checkout", CHECKOUT))
+        elif path == "/login":
+            self._send(200, _page("Sign in", LOGIN))
         elif path == "/__state":
             with st.lock:
                 data = {
@@ -150,6 +168,30 @@ class ShopServer(ThreadingHTTPServer):
         return f"http://127.0.0.1:{self.server_address[1]}"
 
 
+LOGIN = """<h1>Sign in to continue</h1>
+<form onsubmit="return false">
+<p><label>Email <input name="login_email" type="email"></label></p>
+<p><label>Password <input name="login_secret" type="password"></label></p>
+<p><button type="button">Sign in</button></p>
+</form>
+<p>Fixture login wall. This fake shop never accepts real credentials.</p>"""
+
+CHALLENGE_BODY = """<h1>Just a moment...</h1>
+<p><strong>SIMULATED bot challenge.</strong> This page is a fixture served by agent-gauntlet
+to imitate a challenge page. It is not Cloudflare or any real protection service.</p>"""
+
+OVERLAY_HTML = """<div id="promo-modal" class="modal-backdrop" role="dialog" aria-modal="true"
+style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;
+align-items:center;justify-content:center">
+<div class="modal-card" style="background:#fff;padding:24px;max-width:320px">
+<p>Join our newsletter for a welcome discount.</p>
+<button id="promo-close" type="button">No thanks</button></div></div>
+<script>setTimeout(function(){
+  var m=document.getElementById('promo-modal');
+  m.style.display='flex';
+  document.getElementById('promo-close').onclick=function(){m.remove();};
+}, %d);</script>"""
+
 HOME = """<h1>Fixture Shop</h1>
 <p>One product, one cart, one checkout.</p>
 <p><a id="product-link" href="/product">Trail Backpack, $49.00</a></p>"""
@@ -189,6 +231,8 @@ function init() {{
 
 
 def product_body(variant: str) -> str:
+    delay = SCRIPT_DELAY_MS if variant == "slow-scripts" else 0
+    overlay = OVERLAY_HTML % OVERLAY_DELAY_MS if variant == "overlay" else ""
     return f"""<h1>Trail Backpack</h1><p>$49.00</p>
 <form id="atc" method="post" action="/cart/add">
 <input type="hidden" name="form_key" id="form_key" value="">
@@ -196,7 +240,8 @@ def product_body(variant: str) -> str:
 </form>
 <p id="cart-status" role="status"></p>
 <p><a id="cart-link" href="/cart">View cart</a></p>
-<script>{product_script()}</script>"""
+<script>{product_script(delay)}</script>
+{overlay}"""
 
 
 @contextmanager

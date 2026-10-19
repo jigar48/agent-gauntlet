@@ -20,6 +20,7 @@ PRIMARY_FIELD = {
     "screenshot": "name",
     "wait": "ms",
 }
+MAX_ADD_TO_CART_STEPS = 3
 REFUSED_FILL = "target looks like a payment, card, password or one-time-code field (refused)"
 REFUSED_CLICK = "target looks like a final order or payment action (refused)"
 
@@ -97,6 +98,14 @@ class Journey(BaseModel):
     login_markers: list[str] = Field(default_factory=list)
     challenge_markers: list[str] = Field(default_factory=list)
     steps: list[AnyStep]
+
+    @property
+    def checkout_step(self) -> int | None:
+        """1-based index of the first step tagged `checkout`, if any."""
+        for n, step in enumerate(self.steps, start=1):
+            if isinstance(step, Click) and step.tag == "checkout":
+                return n
+        return None
 
 
 def _field_problem(err: dict[str, Any]) -> str:
@@ -188,6 +197,12 @@ def parse_journey(data: Any) -> Journey:
             for n, step in enumerate(steps, start=1):
                 if isinstance(step, Goto) and urlparse(step.url).hostname not in (None, host):
                     problems.append(f"step {n} > goto: url must stay on {host}")
+    carts = sum(1 for s in steps if isinstance(s, Click) and s.tag == "add_to_cart")
+    if carts > MAX_ADD_TO_CART_STEPS:
+        problems.append(
+            f"journey > at most {MAX_ADD_TO_CART_STEPS} steps may be tagged add_to_cart "
+            "(a run is capped at 6 add-to-cart attempts: two paces plus early-action retries)"
+        )
     if problems or head is None:
         raise JourneyError(problems)
     return head.model_copy(update={"steps": steps})
