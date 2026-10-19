@@ -7,7 +7,7 @@ breaks, and stops before payment.
 ## What's in it
 
 - `agent-gauntlet run`: one journey, two paces (human and machine), fresh browser contexts.
-- Four checks: **early-action** (with an estimated minimum working delay), **overlay**,
+- Four checks: **early-action** (with a delay range from a fixed retry grid), **overlay**,
   **login-wall**, **bot-challenge**. Scorecard reads "N of 4 checks passed".
 - `result.json`, screenshots and a self-contained `report.html` (mobile friendly, dark-mode aware).
 - `agent-gauntlet demo`: five fake fixture shops on localhost, one finding each.

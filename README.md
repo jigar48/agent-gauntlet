@@ -12,7 +12,7 @@ agent-gauntlet scorecard: Fixture shop: slow-scripts
 
 [FAIL] Works without waiting
     Step 4 (expect text 'Added to cart') failed after step 3 (click) acted too early when run
-    instantly, but works after waiting. It worked once the page had been given about 2000 ms ...
+    instantly, but works after waiting. The page needed somewhere between 1000 and 2000 ms ...
 [PASS] Nothing covers the buttons
 [PASS] No login wall at checkout
 [PASS] No bot challenge
@@ -102,7 +102,7 @@ The journey runs twice, each in a fresh browser context:
 
 Then four checks (details and limits in [docs/checks.md](docs/checks.md)):
 
-1. **early-action:** works at human pace but fails at machine pace? Reports the minimum working delay (estimated from a few fixed retries).
+1. **early-action:** works at human pace but fails at machine pace? Reports a delay range (between the last failing and first passing delay of a few fixed retries).
 2. **overlay:** is the click target covered by another element (modal, banner)?
 3. **login-wall:** does checkout land on a login or one-time-code wall? (WARN, not FAIL.)
 4. **bot-challenge:** 403/429/503 or known challenge markers? FAIL, stop, never retry or evade.

@@ -60,7 +60,10 @@ def test_slow_scripts_fails_early_action_and_estimates_delay(runs):
         "bot-challenge": "PASS",
     }
     early = check(result, "early-action")
-    assert early.detail["minimum_working_delay_ms"] == 2000
+    assert early.detail["last_failing_delay_ms"] == 1000
+    assert early.detail["first_passing_delay_ms"] == 2000
+    assert "somewhere between 1000 and 2000 ms" in early.what_happened
+    assert "about" not in early.what_happened.split("works after waiting.")[1]
     assert early.detail["tried_ms"] == [250, 500, 1000, 2000]
     assert "works after waiting" in early.what_happened
     assert result.exit_code == 1
@@ -120,3 +123,37 @@ def test_result_json_contains_checks(runs):
         "login-wall",
         "bot-challenge",
     ]
+
+
+def _early(retry):
+    from agent_gauntlet.checks import early_action
+    from agent_gauntlet.result import PaceResult, StepResult
+
+    journey = parse_journey(fixture_journey("http://127.0.0.1:1"))
+    ok = [StepResult(index=n, type="x", label="s", status="ok") for n in range(1, 11)]
+    bad = [*ok[:3], StepResult(index=4, type="x", label="s", status="failed", error="e"), *ok[4:]]
+    paces = [
+        PaceResult(pace="human", status="ok", steps=ok),
+        PaceResult(pace="machine", status="failed", failed_step=4, steps=bad),
+    ]
+    return early_action(journey, paces, retry)[0]
+
+
+def test_delay_range_wording_for_each_retry_outcome():
+    from agent_gauntlet.checks import RetryOutcome
+
+    first_passes = _early(RetryOutcome(3, 4, tried_ms=[250], first_passing_ms=250))
+    assert "somewhere between 0 and 250 ms" in first_passes.what_happened
+    assert first_passes.detail["first_passing_delay_ms"] == 250
+
+    all_fail = _early(
+        RetryOutcome(3, 4, tried_ms=[250, 500, 1000, 2000, 3000], last_failing_ms=3000)
+    )
+    assert "more than 3000 ms" in all_fail.what_happened
+    assert all_fail.detail["first_passing_delay_ms"] is None
+    assert "about" not in all_fail.what_happened.split("works after waiting.")[1]
+
+    limited = _early(
+        RetryOutcome(3, 4, tried_ms=[250, 500], last_failing_ms=500, budget_limited=True)
+    )
+    assert "more than 500 ms" in limited.what_happened and limited.detail["budget_limited"]
