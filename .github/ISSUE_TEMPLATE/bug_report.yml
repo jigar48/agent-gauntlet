@@ -1,0 +1,40 @@
+name: Bug report
+description: Something in agent-gauntlet does not work as documented
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not paste secrets, cookies, or private store URLs. Use a fixture shop
+        (`agent-gauntlet demo`) to reproduce if you can.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command and journey file (remove anything private)
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: agent-gauntlet version (`agent-gauntlet --version`)
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Operating system and Python version
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output or result.json excerpt
+      render: text

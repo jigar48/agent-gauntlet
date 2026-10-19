@@ -1,0 +1,27 @@
+name: Preset request
+description: Ask for a starter journey for another platform (presets are experimental)
+title: "[preset] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Presets are starter journeys, tested only against fixture shops. Please link to the
+        platform's public documentation or template source for the selectors you suggest.
+        Do not post private store URLs.
+  - type: input
+    id: platform
+    attributes:
+      label: Platform and version
+    validations:
+      required: true
+  - type: textarea
+    id: selectors
+    attributes:
+      label: Suggested selectors (add to cart, cart, checkout) and where they come from
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything unusual about this platform's checkout (overlays, scripts, login rules)

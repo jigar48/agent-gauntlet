@@ -10,6 +10,7 @@ from agent_gauntlet import __version__
 from agent_gauntlet.demo import run_demo
 from agent_gauntlet.engine import PermissionDenied, check_permission, execute
 from agent_gauntlet.journey import JourneyError, load_journey
+from agent_gauntlet.presets import PRESET_NAMES, render_preset
 from agent_gauntlet.report import write_report
 from agent_gauntlet.result import RunResult
 from agent_gauntlet.scorecard import headline, scorecard_text
@@ -57,6 +58,14 @@ def build_parser() -> argparse.ArgumentParser:
         default=Path("gauntlet-demo"),
         help="output directory (default: gauntlet-demo)",
     )
+
+    init = sub.add_parser(
+        "init", help="write a starter journey file (presets are experimental, fixture-tested only)"
+    )
+    init.add_argument("--preset", choices=PRESET_NAMES, default="generic")
+    init.add_argument("--out", type=Path, default=Path("journey.yml"))
+    init.add_argument("--base-url", default=None, help="store URL to put in the file")
+    init.add_argument("--force", action="store_true", help="overwrite an existing file")
     return parser
 
 
@@ -107,12 +116,25 @@ def cmd_demo(args: argparse.Namespace) -> int:
     return 0 if all(e.as_designed for e in entries) else 1
 
 
+def cmd_init(args: argparse.Namespace) -> int:
+    if args.out.exists() and not args.force:
+        print(f"{args.out} already exists. Use --force to overwrite it.", file=sys.stderr)
+        return 2
+    args.out.write_text(render_preset(args.preset, args.base_url), encoding="utf-8")
+    print(f"Wrote {args.out} from the '{args.preset}' preset (experimental, not verified against")
+    print("a live store). Edit base_url and the selectors, then run:")
+    print(f"  agent-gauntlet run {args.out} --i-have-permission")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.command == "run":
         return cmd_run(args)
     if args.command == "report":
         return cmd_report(args)
+    if args.command == "init":
+        return cmd_init(args)
     if args.command == "demo":
         return cmd_demo(args)
     return 2
