@@ -38,3 +38,7 @@ agent-gauntlet demo
 No package is published to PyPI.
 
 Full list of changes: `CHANGELOG.md`.
+
+## Support my work
+
+If agent-gauntlet saves you time, you can [buy me a coffee](https://buymeacoffee.com/buildwithjigar).

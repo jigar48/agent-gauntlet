@@ -190,7 +190,8 @@ India (Python, Playwright, FastAPI, AWS, e-commerce platforms, AI agents).
 - Portfolio: [jigar48.github.io/automatewithjigar](https://jigar48.github.io/automatewithjigar/)
 - LinkedIn: [Jigar Prajapati](https://www.linkedin.com/in/buildaiwith-jigar-prajapati/)
 
-### Optional open-source support
+## Support my work
 
-If this saved you time, you can [buy me a coffee](https://buymeacoffee.com/buildwithjigar).
-It is entirely optional; the tool is and stays free.
+If agent-gauntlet saves you time, you can buy me a coffee.
+
+<a href="https://buymeacoffee.com/buildwithjigar"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy me a coffee" height="41"></a>
