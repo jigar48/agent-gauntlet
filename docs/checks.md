@@ -17,7 +17,12 @@ Every run executes the journey twice in fresh browser contexts:
 - Result `FAIL`: "works only after waiting". The tool then retries the machine-pace run in fresh
   contexts, inserting a fixed delay before the acting step (the last `click`/`fill` at or before
   the failing step): 250, 500, 1000, 2000, 3000 ms, smallest first, stopping at the first success.
-  The first delay that works is reported as the estimate.
+  The result is a **range**, never a single number: "somewhere between <last failing delay> and
+  <first passing delay> ms" (the instant run counts as a failing delay of 0 ms). If every retry
+  fails it says "more than 3000 ms" (the largest delay tried), or the largest delay it got to if
+  the add-to-cart limit stopped it early. `result.json` holds `last_failing_delay_ms`,
+  `first_passing_delay_ms` (null if none passed), `tried_ms` and `budget_limited` in the check's
+  `detail`.
 - Both paces pass: `PASS`.
 - Machine passes but human fails (for example a pop-up that only appears later): `PASS`, with the
   paced failure noted.
@@ -28,9 +33,9 @@ Every run executes the journey twice in fresh browser contexts:
 
 **Limits.**
 
-- The delay is an estimate on a coarse ladder, not a measurement, and it is capped at 3000 ms.
+- The range is only as narrow as the retry grid (250, 500, 1000, 2000, 3000 ms) and stops at 3000 ms.
 - Every retry that includes an `add_to_cart` step uses part of the 6-attempt budget, so the
-  estimate can be cut short ("limited by the add-to-cart attempt limit").
+  range can be cut short ("limited by the add-to-cart attempt limit").
 - The failing step is blamed on the nearest earlier click or fill. A slow server response is not
   distinguishable from a slow script.
 - One run per pace: a race that only sometimes loses can pass.

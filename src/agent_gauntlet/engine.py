@@ -87,8 +87,9 @@ def estimate_minimum_delay(
         )
         runs.append(run)
         if run.status == "ok":
-            outcome.min_delay_ms = delay
+            outcome.first_passing_ms = delay
             break
+        outcome.last_failing_ms = delay
     return outcome, runs
 
 

@@ -23,7 +23,9 @@ class RetryOutcome:
     action_step: int
     failed_step: int
     tried_ms: list[int] = field(default_factory=list)
-    min_delay_ms: int | None = None
+    # Range from the retry grid; the instant run (0 ms) failed, so the lower bound starts at 0.
+    last_failing_ms: int = 0
+    first_passing_ms: int | None = None
     budget_limited: bool = False
     screenshots: list[str] = field(default_factory=list)
 
@@ -111,17 +113,22 @@ def early_action(
         )
     if h_bad is None and m_bad is not None:
         assert retry is not None
-        if retry.min_delay_ms is not None:
+        grid = ", ".join(str(d) for d in retry.tried_ms)
+        if retry.first_passing_ms is not None:
             estimate = (
-                f"It worked once the page had been given about {retry.min_delay_ms} ms "
-                f"(tried {', '.join(str(d) for d in retry.tried_ms)} ms)."
+                "The page needed somewhere between "
+                f"{retry.last_failing_ms} and {retry.first_passing_ms} ms "
+                f"(retry grid: {grid} ms)."
             )
         elif retry.budget_limited:
-            estimate = "The delay estimate was cut short by the add-to-cart attempt limit."
+            estimate = (
+                f"The page needed more than {retry.last_failing_ms} ms; the estimate was cut "
+                "short by the add-to-cart attempt limit."
+            )
         else:
             estimate = (
-                f"It still failed after waiting up to {max(retry.tried_ms, default=0)} ms, so "
-                "the cause may not be a simple delay."
+                f"The page needed more than {retry.last_failing_ms} ms (retry grid: {grid} ms), "
+                "or the cause is not a simple delay."
             )
         action = journey.steps[retry.action_step - 1]
         where = (
@@ -143,7 +150,9 @@ def early_action(
                     "failed_step": m_bad.index,
                     "action_step": retry.action_step,
                     "tried_ms": retry.tried_ms,
-                    "minimum_working_delay_ms": retry.min_delay_ms,
+                    "last_failing_delay_ms": retry.last_failing_ms,
+                    "first_passing_delay_ms": retry.first_passing_ms,
+                    "budget_limited": retry.budget_limited,
                 },
             ),
             None,
