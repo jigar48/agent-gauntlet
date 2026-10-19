@@ -52,9 +52,12 @@ def cmd_run(args: argparse.Namespace) -> int:
         print(f"Refusing to run: {exc}", file=sys.stderr)
         return 2
     result = execute(journey, out_dir=args.out, permission=permission)
-    for pace in result.paces:
-        where = f" (failed at step {pace.failed_step})" if pace.failed_step else ""
-        print(f"{pace.pace:>7} pace: {pace.status}{where}")
+    if result.journey_error:
+        print(f"Journey error: {result.journey_error}", file=sys.stderr)
+    for check in result.checks:
+        print(f"[{check.status}] {check.title}: {check.what_happened}")
+    if result.stopped_reason:
+        print(f"Run stopped: {result.stopped_reason}")
     print(f"Wrote {args.out / 'result.json'}")
     return result.exit_code
 

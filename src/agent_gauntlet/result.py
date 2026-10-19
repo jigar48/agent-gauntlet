@@ -51,6 +51,8 @@ class PaceResult(BaseModel):
     steps: list[StepResult] = Field(default_factory=list)
     # Only set for early-action retries: (step index, delay in ms) applied before that step.
     extra_delay: tuple[int, int] | None = None
+    # Set when a bot challenge was seen; the whole run stops at that point.
+    challenge: dict[str, Any] | None = None
 
 
 class CheckResult(BaseModel):
