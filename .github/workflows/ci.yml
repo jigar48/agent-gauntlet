@@ -29,3 +29,5 @@ jobs:
         run: ruff format --check .
       - name: Tests
         run: pytest -q
+      - name: Lint workflows and the composite action (actionlint)
+        run: actionlint .github/workflows/*.yml examples/github-workflow.yml tests/actionlint/local-action.yml

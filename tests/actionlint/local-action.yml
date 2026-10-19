@@ -1,0 +1,18 @@
+# Lint-only workflow: it makes actionlint read and validate the repository's own action.yml.
+# It is not under .github/workflows, so GitHub never runs it.
+name: Lint local action usage
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./
+        with:
+          journey: journeys/checkout.yml
