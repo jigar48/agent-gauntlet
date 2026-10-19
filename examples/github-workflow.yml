@@ -1,0 +1,23 @@
+# Example: run agent-gauntlet from your own repository.
+#
+# - Replace `journeys/checkout.yml` with your journey file (see `agent-gauntlet init`).
+# - Only set `permission-confirmed: "true"` for a site you own or have written permission to test.
+# - Each run adds products to a cart on the target site and can leave abandoned carts.
+# - Pin the action to a release tag or a full commit SHA once you have chosen one.
+name: Checkout audit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jigar48/agent-gauntlet@main
+        with:
+          journey: journeys/checkout.yml
+          permission-confirmed: "true"
