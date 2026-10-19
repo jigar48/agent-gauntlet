@@ -13,7 +13,7 @@ First version. Tested only against the built-in fixture shops, not against any l
   `expect_visible`, `screenshot`, `wait`.
 - Permission gate for non-local hosts, payment and order-action guards, 6 add-to-cart attempt cap,
   configurable User-Agent.
-- Four checks: early-action (with minimum-delay estimate), overlay, login-wall, bot-challenge.
+- Four checks: early-action (reports a delay range from the retry grid), overlay, login-wall, bot-challenge.
 - Scorecard ("N of 4 checks passed"), `result.json`, self-contained `report.html`, `report` command.
 - `demo` command and five fixture shops (clean, slow-scripts, overlay, login-wall, bot-challenge).
 - `init` command with experimental `generic`, `magento2` and `woocommerce` presets.
