@@ -25,7 +25,8 @@ Every run executes the journey twice in fresh browser contexts:
   `detail`.
 - Both paces pass: `PASS`.
 - Machine passes but human fails (for example a pop-up that only appears later): `PASS`, with the
-  paced failure noted.
+  paced failure noted. If machine pace passes but human pace fails, early-action reports PASS, and
+  that can hide a flaky journey.
 - Both fail for a reason another check explains (covered target, login wall): `PASS` or `WARN`,
   with a note. Both fail for any other reason: the journey itself is broken. This is reported as
   a journey error and the exit code is 2.
