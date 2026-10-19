@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agent-gauntlet"
+dynamic = ["version"]
+description = "Deterministic, no-LLM audit of a store's checkout journey, run the way an AI shopping agent runs it."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Jigar Prajapati" }]
+dependencies = [
+  "playwright>=1.49",
+  "pydantic>=2.7,<3",
+  "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+agent-gauntlet = "agent_gauntlet.cli:main"
+
+[project.urls]
+Repository = "https://github.com/jigar48/agent-gauntlet"
+
+[tool.hatch.version]
+path = "src/agent_gauntlet/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agent_gauntlet"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/agent_gauntlet/fixtures/*" = ["E501"]
