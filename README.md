@@ -161,7 +161,7 @@ It can only be used from GitHub after it has been merged to the default branch.
 | Looks at | `llms.txt`, structured data, `robots.txt` | A real checkout, driven by a model | A real checkout, driven by a script |
 | Deterministic | Yes | No | Yes |
 | Cost per run | Usually none | Model usage | None |
-| Finds timing races, overlays, login walls | No | Sometimes, by chance | Yes, on purpose |
+| Finds timing races, overlays, login walls | No | Varies | Yes, on purpose |
 | Judges content, wording, product fit | Partly | Yes | No |
 
 These are categories, not reviews of specific products; use whichever combination suits you.
